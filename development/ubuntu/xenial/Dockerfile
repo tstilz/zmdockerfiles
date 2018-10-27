@@ -115,13 +115,20 @@ RUN a2enmod -q rewrite && a2enmod -q cgi
 # Configure mysql
 # No longer needed for zm >= 1.32.0
 #RUN echo "sql_mode=NO_ENGINE_SUBSTITUTION" >> /etc/mysql/mysql.conf.d/mysqld.cnf
-
+COPY cambozola.jar /usr/local/share/zoneminder/www
 # Expose http port
 EXPOSE 80
 
 # Get the entrypoint script and make sure it is executable
 ADD https://raw.githubusercontent.com/ZoneMinder/zmdockerfiles/master/utils/entrypoint.sh /usr/local/bin/
 RUN chmod 755 /usr/local/bin/entrypoint.sh
+RUN apt-get update &&  \
+    apt-get install -y nano && \
+    apt-get install -y v4l-utils && \
+    rm -rf /var/lib/apt/lists/*
+
+# LET APACHED ACCESS THE WEBCAM ON /dev/video0
+RUN usermod -a -G root www-data
 
 # This is run each time the container is started
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
